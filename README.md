@@ -1,6 +1,6 @@
 ## Example usage
 
-### installation
+### ubuntu/debian installation
 ```
 curl -ssL https://github.com/khodedawsh/jff/raw/refs/heads/master/install_ubuntu.sh | bash
 ```
