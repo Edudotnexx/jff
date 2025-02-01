@@ -21,27 +21,31 @@ async def main():
     api_token = generate_token()
     returned_configs = []
     returned_hashes = set()
-    try:
-        response = await request_configs(
-            args.url,
-            api_token,
-            provider_code=args.code or None
-        )
-    except OSError:
-        raise
-    else:
-        for config in response["configs"]:
-            if config["hash"] in returned_hashes:
-                continue
-            returned_configs.append(
-                ProxyConfig(
-                    link=config["url"],
-                    hash=config["hash"],
-                    fragment=config["use_fragment"],
-                )
+    os_errors = 0
+    for _ in range(3):
+        try:
+            response = await request_configs(
+                args.url,
+                api_token,
+                provider_code=args.code or None
             )
-            returned_hashes.add(config["hash"])
-        return print(json.dumps([r.model_dump() for r in returned_configs]))
+        except OSError:
+            if os_errors > 3:
+                raise
+            continue
+        else:
+            for config in response["configs"]:
+                if config["hash"] in returned_hashes:
+                    continue
+                returned_configs.append(
+                    ProxyConfig(
+                        link=config["url"],
+                        hash=config["hash"],
+                        fragment=config["use_fragment"],
+                    )
+                )
+                returned_hashes.add(config["hash"])
+            return print(json.dumps([r.model_dump() for r in returned_configs]))
 
 
 def entry():
